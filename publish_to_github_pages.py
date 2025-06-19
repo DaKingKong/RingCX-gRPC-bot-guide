@@ -51,7 +51,7 @@ def install_dependencies():
     return True
 
 def create_html_template():
-    """Create an HTML template for the GitHub Pages site."""
+    """Create a calm, minimal HTML template for the GitHub Pages site."""
     return """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,390 +59,262 @@ def create_html_template():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RingCX gRPC Streaming Implementation Guide</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
     <style>
         :root {{
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary-color: #64748b;
-            --accent-color: #f59e0b;
-            --background-color: #ffffff;
-            --surface-color: #f8fafc;
+            --primary-color: #2d3748; /* calm dark blue-gray */
+            --primary-hover: #1a202c;
+            --secondary-color: #4a5568;
+            --background-color: #f7fafc;
+            --surface-color: #ffffff;
             --border-color: #e2e8f0;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --code-bg: #1e293b;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --text-primary: #22223b;
+            --text-secondary: #4a5568;
+            --code-bg: #f1f5f9;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
         }}
-
-        * {{
-            box-sizing: border-box;
-        }}
-
         body {{
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
+            background: var(--background-color);
             color: var(--text-primary);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
             padding: 0;
             min-height: 100vh;
         }}
-
         .container {{
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2rem 1rem;
         }}
-
         .header {{
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--surface-color);
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: var(--shadow-sm);
         }}
-
         .header-content {{
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
+            padding: 1rem 0;
         }}
-
         .logo {{
             display: flex;
             align-items: center;
             gap: 0.75rem;
             text-decoration: none;
-            color: var(--text-primary);
+            color: var(--primary-color);
         }}
-
         .logo-icon {{
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: var(--primary-color);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }}
-
-        .logo-text {{
-            font-size: 1.5rem;
+            color: #fff;
             font-weight: 700;
-            color: var(--text-primary);
+            font-size: 1.1rem;
         }}
-
+        .logo-text {{
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }}
         .main-content {{
-            background: var(--background-color);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            margin: 2rem auto;
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            margin: 2rem 0;
             overflow: hidden;
-            max-width: 1000px;
         }}
-
         .markdown-body {{
             box-sizing: border-box;
             min-width: 200px;
             max-width: none;
             margin: 0;
-            padding: 3rem;
-            background: var(--background-color);
+            padding: 2.5rem 2rem;
+            background: var(--surface-color);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.7;
             color: var(--text-primary);
         }}
-
         .markdown-body h1 {{
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 3px solid var(--primary-color);
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }}
-
-        .markdown-body h2 {{
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 2.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.2rem;
             border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
         }}
-
-        .markdown-body h3 {{
-            font-size: 1.4rem;
+        .markdown-body h2 {{
+            font-size: 1.5rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--primary-color);
             margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3rem;
+        }}
+        .markdown-body h3 {{
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 1.5rem;
             margin-bottom: 0.75rem;
         }}
-
         .markdown-body h4 {{
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 1.2rem;
             margin-bottom: 0.5rem;
         }}
-
         .markdown-body p {{
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.1rem;
             color: var(--text-secondary);
         }}
-
         .markdown-body strong {{
             color: var(--text-primary);
             font-weight: 600;
         }}
-
         .markdown-body code {{
-            background: var(--surface-color);
+            background: var(--code-bg);
             color: var(--primary-color);
-            padding: 0.2rem 0.4rem;
+            padding: 0.18rem 0.35rem;
             border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.95em;
             border: 1px solid var(--border-color);
         }}
-
         .markdown-body pre {{
             background: var(--code-bg);
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 1.1rem;
             overflow-x: auto;
             border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-md);
         }}
-
         .markdown-body pre code {{
             background: none;
-            color: #e2e8f0;
+            color: var(--primary-color);
             padding: 0;
             border: none;
-            font-size: 0.875rem;
+            font-size: 0.95em;
         }}
-
         .markdown-body blockquote {{
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            border-left: 4px solid var(--accent-color);
-            box-shadow: var(--shadow-md);
+            background: #f1f5f9;
+            color: var(--primary-color);
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin: 1.2rem 0;
+            border-left: 4px solid var(--primary-color);
         }}
-
         .markdown-body blockquote p {{
-            color: white;
+            color: var(--primary-color);
             margin: 0;
         }}
-
         .markdown-body table {{
             border-collapse: collapse;
             width: 100%;
-            margin: 1.5rem 0;
-            border-radius: 8px;
+            margin: 1.2rem 0;
+            border-radius: 6px;
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
         }}
-
         .markdown-body th {{
             background: var(--primary-color);
-            color: white;
-            padding: 1rem;
+            color: #fff;
+            padding: 0.7rem;
             text-align: left;
             font-weight: 600;
         }}
-
         .markdown-body td {{
-            padding: 1rem;
+            padding: 0.7rem;
             border-bottom: 1px solid var(--border-color);
-            background: var(--background-color);
-        }}
-
-        .markdown-body tr:nth-child(even) td {{
             background: var(--surface-color);
         }}
-
-        .markdown-body ul, .markdown-body ol {{
-            padding-left: 1.5rem;
-            margin-bottom: 1.25rem;
+        .markdown-body tr:nth-child(even) td {{
+            background: #f7fafc;
         }}
-
+        .markdown-body ul, .markdown-body ol {{
+            padding-left: 1.3rem;
+            margin-bottom: 1.1rem;
+        }}
         .markdown-body li {{
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: var(--text-secondary);
         }}
-
         .markdown-body a {{
             color: var(--primary-color);
-            text-decoration: none;
+            text-decoration: underline;
             font-weight: 500;
             transition: color 0.2s ease;
         }}
-
         .markdown-body a:hover {{
             color: var(--primary-hover);
-            text-decoration: underline;
         }}
-
         .github-corner {{
             position: fixed;
             top: 0;
             right: 0;
             z-index: 1000;
         }}
-
         .github-corner:hover .octo-arm {{
             animation: octocat-wave 560ms ease-in-out;
         }}
-
         @keyframes octocat-wave {{
             0%, 100% {{ transform: rotate(0); }}
             20%, 60% {{ transform: rotate(-25deg); }}
             40%, 80% {{ transform: rotate(10deg); }}
         }}
-
         .github-corner svg {{
             fill: var(--primary-color);
-            color: white;
+            color: #fff;
             position: fixed;
             top: 0;
             border: 0;
             right: 0;
         }}
-
         .github-corner .octo-arm {{
             transform-origin: 130px 106px;
         }}
-
         .footer {{
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--surface-color);
             border-top: 1px solid var(--border-color);
-            padding: 2rem;
+            padding: 1.5rem 0;
             text-align: center;
             color: var(--text-secondary);
-            margin-top: 3rem;
+            margin-top: 2rem;
         }}
-
         .footer-content {{
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
         }}
-
         .footer a {{
             color: var(--primary-color);
-            text-decoration: none;
+            text-decoration: underline;
             font-weight: 500;
         }}
-
         .footer a:hover {{
-            text-decoration: underline;
+            color: var(--primary-hover);
         }}
-
         @media (max-width: 768px) {{
             .container {{
                 padding: 1rem;
             }}
-            
             .header-content {{
-                padding: 1rem;
+                padding: 1rem 0;
             }}
-            
             .markdown-body {{
-                padding: 1.5rem;
+                padding: 1rem 0.5rem;
             }}
-            
-            .markdown-body h1 {{
-                font-size: 2rem;
+            .main-content {{
+                margin: 1rem 0;
             }}
-            
-            .markdown-body h2 {{
-                font-size: 1.5rem;
-            }}
-            
             .logo-text {{
-                font-size: 1.2rem;
+                font-size: 1rem;
             }}
-        }}
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {{
-            width: 8px;
-        }}
-
-        ::-webkit-scrollbar-track {{
-            background: var(--surface-color);
-        }}
-
-        ::-webkit-scrollbar-thumb {{
-            background: var(--primary-color);
-            border-radius: 4px;
-        }}
-
-        ::-webkit-scrollbar-thumb:hover {{
-            background: var(--primary-hover);
-        }}
-
-        /* Syntax highlighting improvements */
-        .highlight {{
-            background: var(--code-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-md);
-        }}
-
-        .highlight pre {{
-            background: none;
-            padding: 0;
-            margin: 0;
-        }}
-
-        /* Alert boxes */
-        .alert {{
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            border-left: 4px solid;
-        }}
-
-        .alert-info {{
-            background: rgba(59, 130, 246, 0.1);
-            border-left-color: var(--primary-color);
-            color: var(--primary-color);
-        }}
-
-        .alert-warning {{
-            background: rgba(245, 158, 11, 0.1);
-            border-left-color: var(--accent-color);
-            color: #92400e;
-        }}
-
-        .alert-success {{
-            background: rgba(34, 197, 94, 0.1);
-            border-left-color: #22c55e;
-            color: #166534;
         }}
     </style>
 </head>
@@ -474,8 +346,7 @@ def create_html_template():
 
     <footer class="footer">
         <div class="footer-content">
-            <p>Built with ❤️ for the RingCX community</p>
-            <p>View the source on <a href="https://github.com/DaKingKong/RingCX-gRPC-bot-guide">GitHub</a></p>
+            <p>Built for the RingCX community &middot; <a href="https://github.com/DaKingKong/RingCX-gRPC-bot-guide">GitHub</a></p>
         </div>
     </footer>
 
