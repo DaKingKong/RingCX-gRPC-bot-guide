@@ -295,18 +295,18 @@
 <p><strong>Local Development with ngrok:</strong> Running locally via ngrok presents challenges due to port restrictions as well. TCP tunnels use their own port numbers rather than the required port 443. ngrok HTTPS tunnels use port 443 but encounter SSL certificate complications that prevent proper functionality.</p>
 </blockquote>
 <h2 id="1-create-a-virtual-environment-and-install-dependencies">1. Create a Virtual Environment and Install Dependencies</h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Create a virtual environment</span>
-python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<pre class="codehilite"><code class="language-bash"># Create a virtual environment
+python -m venv .venv
 
-<span class="c1"># Activate the virtual environment</span>
-<span class="c1"># On Windows:</span>
+# Activate the virtual environment
+# On Windows:
 .venv/Scripts/activate
-<span class="c1"># On Linux/Mac:</span>
-<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+# On Linux/Mac:
+source .venv/bin/activate
 
-<span class="c1"># Install dependencies</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="nv">grpcio</span><span class="o">==</span><span class="m">1</span>.71.0<span class="w"> </span>grpcio-tools<span class="o">==</span><span class="m">1</span>.29.0<span class="w"> </span><span class="nv">protobuf</span><span class="o">==</span><span class="m">5</span>.29.0
-</code></pre></div>
+# Install dependencies
+pip install grpcio==1.71.0 grpcio-tools==1.29.0 protobuf==5.29.0
+</code></pre>
 
 <blockquote>
 <p><strong>Note:</strong> If you encounter build errors with grpcio-tools on Windows, use pre-compiled wheels instead:
@@ -315,149 +315,149 @@ pip install --use-pep517 grpcio-tools</code>
 Alternatively, install Microsoft Visual C++ Build Tools from <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">visualstudio.microsoft.com</a></p>
 </blockquote>
 <p>For more advanced functionality (will be mentioned later), install additional dependencies:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># For transcription functionality</span>
-pip<span class="w"> </span>install<span class="w"> </span>google-cloud-speech<span class="o">==</span><span class="m">2</span>.26.1
+<pre class="codehilite"><code class="language-bash"># For transcription functionality
+pip install google-cloud-speech==2.26.1
 
-<span class="c1"># For file serving functionality</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="nv">flask</span><span class="o">==</span><span class="m">2</span>.3.3<span class="w"> </span><span class="nv">requests</span><span class="o">==</span><span class="m">2</span>.31.0
-</code></pre></div>
+# For file serving functionality
+pip install flask==2.3.3 requests==2.31.0
+</code></pre>
 
 <p>Alternatively, create a <code>requirements.txt</code> file with:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">grpcio</span><span class="o">==</span><span class="mf">1.71</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">grpcio</span><span class="o">-</span><span class="n">tools</span><span class="o">==</span><span class="mf">1.71</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">protobuf</span><span class="o">==</span><span class="mf">5.29</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">google</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">speech</span><span class="o">==</span><span class="mf">2.26</span><span class="o">.</span><span class="mi">1</span>
-<span class="n">requests</span><span class="o">==</span><span class="mf">2.31</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">flask</span><span class="o">==</span><span class="mf">2.3</span><span class="o">.</span><span class="mi">3</span>
-</code></pre></div>
+<pre class="codehilite"><code>grpcio==1.71.0
+grpcio-tools==1.71.0
+protobuf==5.29.0
+google-cloud-speech==2.26.1
+requests==2.31.0
+flask==2.3.3
+</code></pre>
 
 <p>And install with:</p>
-<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-</code></pre></div>
+<pre class="codehilite"><code class="language-bash">pip install -r requirements.txt
+</code></pre>
 
 <h2 id="2-generate-grpc-code-from-protocol-buffers">2. Generate gRPC Code from Protocol Buffers</h2>
 <p>First, save the following protobuf definition to a file named <code>ringcx_streaming.proto</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">syntax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;proto3&quot;</span><span class="p">;</span>
+<pre class="codehilite"><code class="language-protobuf">syntax = &quot;proto3&quot;;
 
-<span class="k">import</span><span class="w"> </span><span class="s">&quot;google/protobuf/empty.proto&quot;</span><span class="p">;</span>
+import &quot;google/protobuf/empty.proto&quot;;
 
-<span class="kn">package</span><span class="w"> </span><span class="nn">ringcentral</span><span class="o">.</span><span class="n">ringcx.streaming.v1beta2</span><span class="p">;</span>
+package ringcentral.ringcx.streaming.v1beta2;
 
-<span class="kd">enum</span><span class="w"> </span><span class="n">Codec</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="na">CODEC_UNSPECIFIED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">  </span><span class="na">OPUS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="na">PCMA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="na">PCMU</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="w">  </span><span class="na">L16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
-<span class="w">  </span><span class="na">FLAC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
-<span class="p">}</span>
+enum Codec {
+  CODEC_UNSPECIFIED = 0;
+  OPUS = 1;
+  PCMA = 2;
+  PCMU = 3;
+  L16 = 4;
+  FLAC = 5;
+}
 
-<span class="kd">enum</span><span class="w"> </span><span class="n">ProductType</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="na">PRODUCT_TYPE_UNSPECIFIED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">  </span><span class="na">QUEUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="na">CAMPAIGN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="na">IVR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="c1">// RFU</span>
-<span class="p">}</span>
+enum ProductType {
+  PRODUCT_TYPE_UNSPECIFIED = 0;
+  QUEUE = 1;
+  CAMPAIGN = 2;
+  IVR = 3; // RFU
+}
 
-<span class="kd">enum</span><span class="w"> </span><span class="n">DialogType</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="na">DIALOG_TYPE_UNSPECIFIED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">  </span><span class="na">INBOUND</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="na">OUTBOUND</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="p">}</span>
+enum DialogType {
+  DIALOG_TYPE_UNSPECIFIED = 0;
+  INBOUND = 1;
+  OUTBOUND = 2;
+}
 
-<span class="kd">enum</span><span class="w"> </span><span class="n">ParticipantType</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="na">PARTICIPANT_TYPE_UNSPECIFIED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">  </span><span class="na">CONTACT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="na">AGENT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="na">BOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="c1">// yes, value is 5</span>
-<span class="p">}</span>
+enum ParticipantType {
+  PARTICIPANT_TYPE_UNSPECIFIED = 0;
+  CONTACT = 1;
+  AGENT = 2;
+  BOT = 5; // yes, value is 5
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">Account</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">sub_account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">rc_account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="p">}</span>
+message Account {
+  string id = 1;
+  string sub_account_id = 2;
+  string rc_account_id = 3;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">Product</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="n">ProductType</span><span class="w"> </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="p">}</span>
+message Product {
+  string id = 1;
+  ProductType type = 2;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">Dialog</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="n">DialogType</span><span class="w"> </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="na">ani</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="na">dnis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="na">language</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="c1">// https://www.rfc-editor.org/rfc/bcp/bcp47.txt</span>
-<span class="w">  </span><span class="n">map</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">&gt;</span><span class="w"> </span><span class="na">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
-<span class="p">}</span>
+message Dialog {
+  string id = 1;
+  DialogType type = 2;
+  optional string ani = 3;
+  optional string dnis = 4;
+  optional string language = 5; // https://www.rfc-editor.org/rfc/bcp/bcp47.txt
+  map&lt;string, string&gt; attributes = 6;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">Participant</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="n">ParticipantType</span><span class="w"> </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="p">}</span>
+message Participant {
+  string id = 1;
+  ParticipantType type = 2;
+  optional string name = 3;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">AudioFormat</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">Codec</span><span class="w"> </span><span class="na">codec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="kt">uint32</span><span class="w"> </span><span class="na">rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// must be 8000 for now</span>
-<span class="w">  </span><span class="kt">uint32</span><span class="w"> </span><span class="na">ptime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="c1">// size of audio chunks in msec</span>
-<span class="p">}</span>
+message AudioFormat {
+  Codec codec = 1;
+  uint32 rate = 2;  // must be 8000 for now
+  uint32 ptime = 3; // size of audio chunks in msec
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">AudioContent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">bytes</span><span class="w"> </span><span class="na">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="kt">uint32</span><span class="w"> </span><span class="na">seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">      </span><span class="c1">// could be repeated</span>
-<span class="w">  </span><span class="kt">uint32</span><span class="w"> </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="c1">// in msec</span>
-<span class="p">}</span>
+message AudioContent {
+  bytes payload = 1;
+  uint32 seq = 2;      // could be repeated
+  uint32 duration = 3; // in msec
+}
 
-<span class="kd">service</span><span class="w"> </span><span class="n">Streaming</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// For each Dialog, gRPC client makes single &#39;Stream&#39; call toward server and all &#39;StreamEvent&#39; messages are sent over the established stream</span>
-<span class="w">  </span><span class="c1">// Server does not return any response/stream back</span>
-<span class="w">  </span><span class="k">rpc</span><span class="w"> </span><span class="n">Stream</span><span class="p">(</span><span class="n">stream</span><span class="w"> </span><span class="n">StreamEvent</span><span class="p">)</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="p">(</span><span class="n">google.protobuf.Empty</span><span class="p">);</span>
-<span class="p">}</span>
+service Streaming {
+  // For each Dialog, gRPC client makes single 'Stream' call toward server and all 'StreamEvent' messages are sent over the established stream
+  // Server does not return any response/stream back
+  rpc Stream(stream StreamEvent) returns (google.protobuf.Empty);
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">StreamEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="k">oneof</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">DialogInitEvent</span><span class="w"> </span><span class="na">dialog_init</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">    </span><span class="n">SegmentStartEvent</span><span class="w"> </span><span class="na">segment_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="w">    </span><span class="n">SegmentMediaEvent</span><span class="w"> </span><span class="na">segment_media</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
-<span class="w">    </span><span class="n">SegmentInfoEvent</span><span class="w"> </span><span class="na">segment_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
-<span class="w">    </span><span class="n">SegmentStopEvent</span><span class="w"> </span><span class="na">segment_stop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
+message StreamEvent {
+  string session_id = 1;
+  oneof event {
+    DialogInitEvent dialog_init = 2;
+    SegmentStartEvent segment_start = 3;
+    SegmentMediaEvent segment_media = 4;
+    SegmentInfoEvent segment_info = 5;
+    SegmentStopEvent segment_stop = 6;
+  }
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">DialogInitEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">Account</span><span class="w"> </span><span class="na">account</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="n">Dialog</span><span class="w"> </span><span class="na">dialog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="p">}</span>
+message DialogInitEvent {
+  Account account = 1;
+  Dialog dialog = 2;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">SegmentStartEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">segment_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="n">Product</span><span class="w"> </span><span class="na">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="n">Participant</span><span class="w"> </span><span class="na">participant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="n">AudioFormat</span><span class="w"> </span><span class="na">audio_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
-<span class="p">}</span>
+message SegmentStartEvent {
+  string segment_id = 1;
+  optional Product product = 2;
+  Participant participant = 3;
+  optional AudioFormat audio_format = 4;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">SegmentMediaEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">segment_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="n">AudioContent</span><span class="w"> </span><span class="na">audio_content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="p">}</span>
+message SegmentMediaEvent {
+  string segment_id = 1;
+  AudioContent audio_content = 2;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">SegmentInfoEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">segment_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
-<span class="w">  </span><span class="k">optional</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="na">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
-<span class="p">}</span>
+message SegmentInfoEvent {
+  string segment_id = 1;
+  string event = 2;
+  optional string data = 3;
+}
 
-<span class="kd">message</span><span class="w"> </span><span class="nc">SegmentStopEvent</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">segment_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div>
+message SegmentStopEvent {
+  string segment_id = 1;
+}
+</code></pre>
 
 <p>Now generate the Python gRPC code:</p>
-<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>grpc_tools.protoc<span class="w"> </span>-I.<span class="w"> </span>--python_out<span class="o">=</span>.<span class="w"> </span>--pyi_out<span class="o">=</span>.<span class="w"> </span>--grpc_python_out<span class="o">=</span>.<span class="w"> </span>ringcx_streaming.proto
-</code></pre></div>
+<pre class="codehilite"><code class="language-bash">python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. ringcx_streaming.proto
+</code></pre>
 
 <p>This will create three files:
 - <code>ringcx_streaming_pb2.py</code>: Contains message classes
@@ -469,103 +469,103 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="nv">flask
 <summary>Click to expand simple_server.py</summary>
 
 
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">grpc</span>
-<span class="kn">import</span> <span class="nn">concurrent.futures</span>
-<span class="kn">import</span> <span class="nn">signal</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">ringcx_streaming_pb2_grpc</span>
-<span class="kn">from</span> <span class="nn">google.protobuf.empty_pb2</span> <span class="kn">import</span> <span class="n">Empty</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<pre class="codehilite"><code class="language-python">import grpc
+import concurrent.futures
+import signal
+import sys
+import traceback
+import os
+import ringcx_streaming_pb2_grpc
+from google.protobuf.empty_pb2 import Empty
+import logging
 
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
-    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)]</span>
-<span class="p">)</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;simple-speech-server&#39;</span><span class="p">)</span>
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger('simple-speech-server')
 
-<span class="k">class</span> <span class="nc">StreamingService</span><span class="p">(</span><span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">StreamingServicer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">Stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_iterator</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server started, waiting for audio stream...&quot;</span><span class="p">)</span>
+class StreamingService(ringcx_streaming_pb2_grpc.StreamingServicer):
+    def Stream(self, request_iterator, context):
+        logger.info(&quot;Server started, waiting for audio stream...&quot;)
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">stream_event</span> <span class="ow">in</span> <span class="n">request_iterator</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">stream_event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;segment_media&#39;</span><span class="p">):</span>
-                    <span class="n">payload_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream_event</span><span class="o">.</span><span class="n">segment_media</span><span class="o">.</span><span class="n">audio_content</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received segment media with payload size: </span><span class="si">{</span><span class="n">payload_size</span><span class="si">}</span><span class="s2"> bytes&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received other stream event type&quot;</span><span class="p">)</span>
+        try:
+            for stream_event in request_iterator:
+                if stream_event.HasField('segment_media'):
+                    payload_size = len(stream_event.segment_media.audio_content.payload)
+                    logger.info(f&quot;Received segment media with payload size: {payload_size} bytes&quot;)
+                else:
+                    logger.info(f&quot;Received other stream event type&quot;)
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream completed.&quot;</span><span class="p">)</span>
+            logger.info(&quot;Stream completed.&quot;)
 
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during stream processing: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">context</span><span class="o">.</span><span class="n">set_code</span><span class="p">(</span><span class="n">grpc</span><span class="o">.</span><span class="n">StatusCode</span><span class="o">.</span><span class="n">INTERNAL</span><span class="p">)</span>
-            <span class="n">context</span><span class="o">.</span><span class="n">set_details</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stream processing error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        except Exception as e:
+            logger.error(f&quot;Error during stream processing: {e}&quot;)
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f&quot;Stream processing error: {str(e)}&quot;)
 
-        <span class="k">return</span> <span class="n">Empty</span><span class="p">()</span>
+        return Empty()
 
-<span class="k">def</span> <span class="nf">serve</span><span class="p">():</span>
-    <span class="n">server</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">server</span><span class="p">(</span><span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
-    <span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">add_StreamingServicer_to_server</span><span class="p">(</span>
-        <span class="n">StreamingService</span><span class="p">(),</span> <span class="n">server</span>
-    <span class="p">)</span>
+def serve():
+    server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
+    ringcx_streaming_pb2_grpc.add_StreamingServicer_to_server(
+        StreamingService(), server
+    )
 
-    <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PORT&quot;</span><span class="p">,</span> <span class="mi">443</span><span class="p">))</span>
-    <span class="n">host</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span>
-    <span class="n">server_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s1">&#39;</span>
+    port = int(os.environ.get(&quot;PORT&quot;, 443))
+    host = '0.0.0.0'
+    server_address = f'{host}:{port}'
 
-    <span class="n">cert_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_CERT_FILE&#39;</span><span class="p">)</span>
-    <span class="n">key_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_KEY_FILE&#39;</span><span class="p">)</span>
+    cert_file = os.environ.get('SSL_CERT_FILE')
+    key_file = os.environ.get('SSL_KEY_FILE')
 
-    <span class="k">if</span> <span class="n">cert_file</span> <span class="ow">and</span> <span class="n">key_file</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cert_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key_file</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cert_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">cert_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">key_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">key_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    if cert_file and key_file and os.path.exists(cert_file) and os.path.exists(key_file):
+        with open(cert_file, 'rb') as f:
+            cert_data = f.read()
+        with open(key_file, 'rb') as f:
+            key_data = f.read()
 
-        <span class="n">server_credentials</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_server_credentials</span><span class="p">([(</span><span class="n">key_data</span><span class="p">,</span> <span class="n">cert_data</span><span class="p">)])</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">add_secure_port</span><span class="p">(</span><span class="n">server_address</span><span class="p">,</span> <span class="n">server_credentials</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server started with SSL at </span><span class="si">{</span><span class="n">server_address</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">add_insecure_port</span><span class="p">(</span><span class="n">server_address</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server started without SSL at </span><span class="si">{</span><span class="n">server_address</span><span class="si">}</span><span class="s2"> (insecure)&quot;</span><span class="p">)</span>
+        server_credentials = grpc.ssl_server_credentials([(key_data, cert_data)])
+        server.add_secure_port(server_address, server_credentials)
+        logger.info(f&quot;Server started with SSL at {server_address}&quot;)
+    else:
+        server.add_insecure_port(server_address)
+        logger.info(f&quot;Server started without SSL at {server_address} (insecure)&quot;)
 
-    <span class="n">server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    server.start()
 
-    <span class="k">def</span> <span class="nf">graceful_shutdown</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Received signal to terminate. Shutting down server gracefully...&quot;</span><span class="p">)</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">grace</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server stopped successfully&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    def graceful_shutdown(signum, frame):
+        logger.info(&quot;Received signal to terminate. Shutting down server gracefully...&quot;)
+        server.stop(grace=5)
+        logger.info(&quot;Server stopped successfully&quot;)
+        sys.exit(0)
 
-    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">graceful_shutdown</span><span class="p">)</span>
-    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">graceful_shutdown</span><span class="p">)</span>
+    signal.signal(signal.SIGINT, graceful_shutdown)
+    signal.signal(signal.SIGTERM, graceful_shutdown)
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">wait_for_termination</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt received. Shutting down server gracefully...&quot;</span><span class="p">)</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">grace</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server stopped successfully&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+    try:
+        server.wait_for_termination()
+    except KeyboardInterrupt:
+        logger.info(&quot;Keyboard interrupt received. Shutting down server gracefully...&quot;)
+        server.stop(grace=5)
+        logger.info(&quot;Server stopped successfully&quot;)
+    except Exception as e:
+        logger.error(f&quot;Server error: {e}&quot;)
+        traceback.print_exc()
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting simple server&quot;</span><span class="p">)</span>
-        <span class="n">serve</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt received. Exiting...&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Critical error in main loop: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</code></pre></div>
+if __name__ == '__main__':
+    try:
+        logger.info(&quot;Starting simple server&quot;)
+        serve()
+    except KeyboardInterrupt:
+        logger.info(&quot;Keyboard interrupt received. Exiting...&quot;)
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f&quot;Critical error in main loop: {e}&quot;)
+        traceback.print_exc()
+        sys.exit(1)
+</code></pre>
 
 
 
@@ -573,39 +573,39 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="nv">flask
 
 <h3 id="generate-local-ssl-certificates">Generate Local SSL Certificates</h3>
 <p>For production, use a proper SSL certificate from a trusted certificate authority. For testing, generate self-signed certificates (fields can all be empty for a default registration):</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Generate private key</span>
-openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>server.key<span class="w"> </span><span class="m">2048</span>
+<pre class="codehilite"><code class="language-bash"># Generate private key
+openssl genrsa -out server.key 2048
 
-<span class="c1"># Generate certificate signing request</span>
-openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.csr
+# Generate certificate signing request
+openssl req -new -key server.key -out server.csr
 
-<span class="c1"># Generate self-signed certificate (valid for 365 days)</span>
-openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-in<span class="w"> </span>server.csr<span class="w"> </span>-signkey<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.crt
-</code></pre></div>
+# Generate self-signed certificate (valid for 365 days)
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+</code></pre>
 
 <h4 id="for-online-instances-aws-ec2">For Online Instances (AWS EC2)</h4>
 <p>When generating certificates on EC2, you need to specify the Common Name (CN) that matches your server's public DNS or IP:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Generate private key</span>
-openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>server.key<span class="w"> </span><span class="m">2048</span>
+<pre class="codehilite"><code class="language-bash"># Generate private key
+openssl genrsa -out server.key 2048
 
-<span class="c1"># Generate CSR with specific info (especially Common Name)</span>
-openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.csr<span class="w"> </span>-subj<span class="w"> </span><span class="s2">&quot;/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=your-ec2-public-dns-or-ip&quot;</span>
-<span class="c1"># Example: &quot;/CN=ec2-12-34-56-78.compute-1.amazonaws.com&quot; or &quot;/CN=12.34.56.78&quot;</span>
+# Generate CSR with specific info (especially Common Name)
+openssl req -new -key server.key -out server.csr -subj &quot;/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=your-ec2-public-dns-or-ip&quot;
+# Example: &quot;/CN=ec2-12-34-56-78.compute-1.amazonaws.com&quot; or &quot;/CN=12.34.56.78&quot;
 
-<span class="c1"># Generate self-signed certificate</span>
-openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-in<span class="w"> </span>server.csr<span class="w"> </span>-signkey<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.crt
-</code></pre></div>
+# Generate self-signed certificate
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+</code></pre>
 
 <p>Note: If using an IP address, some clients might still show security warnings since they expect domain names.</p>
 <h3 id="run-the-server-with-ssl">Run the Server with SSL</h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Set environment variables for SSL certificate paths</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_CERT_FILE</span><span class="o">=</span>/path/to/server.crt
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_KEY_FILE</span><span class="o">=</span>/path/to/server.key
-<span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">443</span>
+<pre class="codehilite"><code class="language-bash"># Set environment variables for SSL certificate paths
+export SSL_CERT_FILE=/path/to/server.crt
+export SSL_KEY_FILE=/path/to/server.key
+export PORT=443
 
-<span class="c1"># Run the server</span>
-python<span class="w"> </span>simple_server.py
-</code></pre></div>
+# Run the server
+python simple_server.py
+</code></pre>
 
 <h2 id="4-configure-ringcx-workflow">4. Configure RingCX Workflow</h2>
 <p>Now that our gRPC server is up and running, we want to configure RingCX:</p>
@@ -636,456 +636,456 @@ python<span class="w"> </span>simple_server.py
 <summary>Click to expand file_server.py</summary>
 
 
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">grpc</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">import</span> <span class="nn">wave</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">concurrent</span> <span class="kn">import</span> <span class="n">futures</span>
-<span class="kn">from</span> <span class="nn">google.protobuf.empty_pb2</span> <span class="kn">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">send_file</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">render_template_string</span><span class="p">,</span> <span class="n">jsonify</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">ringcx_streaming_pb2</span>
-<span class="kn">import</span> <span class="nn">ringcx_streaming_pb2_grpc</span>
-<span class="kn">import</span> <span class="nn">audioop</span>
-<span class="kn">import</span> <span class="nn">queue</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-<span class="n">OUTPUT_FOLDER</span> <span class="o">=</span> <span class="s1">&#39;saved_audio&#39;</span>
-
-<span class="c1"># HTML template for the web page</span>
-<span class="n">HTML_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">&lt;!DOCTYPE html&gt;</span>
-<span class="s2">&lt;html&gt;</span>
-<span class="s2">&lt;head&gt;</span>
-<span class="s2">    &lt;title&gt;Audio Recordings&lt;/title&gt;</span>
-<span class="s2">    &lt;style&gt;</span>
-<span class="s2">        body {</span>
-<span class="s2">            font-family: Arial, sans-serif;</span>
-<span class="s2">            max-width: 900px;</span>
-<span class="s2">            margin: 0 auto;</span>
-<span class="s2">            padding: 20px;</span>
-<span class="s2">        }</span>
-<span class="s2">        h1, h2, h3 {</span>
-<span class="s2">            color: #333;</span>
-<span class="s2">        }</span>
-<span class="s2">        ul {</span>
-<span class="s2">            list-style-type: none;</span>
-<span class="s2">            padding: 0;</span>
-<span class="s2">        }</span>
-<span class="s2">        li {</span>
-<span class="s2">            border: 1px solid #ddd;</span>
-<span class="s2">            margin-bottom: 10px;</span>
-<span class="s2">            padding: 10px;</span>
-<span class="s2">            border-radius: 4px;</span>
-<span class="s2">        }</span>
-<span class="s2">        audio {</span>
-<span class="s2">            width: 100%;</span>
-<span class="s2">        }</span>
-<span class="s2">        .timestamp {</span>
-<span class="s2">            color: #666;</span>
-<span class="s2">            font-size: 0.8em;</span>
-<span class="s2">        }</span>
-<span class="s2">        .session {</span>
-<span class="s2">            margin-bottom: 30px;</span>
-<span class="s2">            border: 1px solid #eee;</span>
-<span class="s2">            padding: 15px;</span>
-<span class="s2">            border-radius: 8px;</span>
-<span class="s2">            background-color: #f9f9f9;</span>
-<span class="s2">        }</span>
-<span class="s2">    &lt;/style&gt;</span>
-<span class="s2">&lt;/head&gt;</span>
-<span class="s2">&lt;body&gt;</span>
-<span class="s2">    &lt;h1&gt;Recorded Audio Files&lt;/h1&gt;</span>
-
-<span class="s2">    {</span><span class="si">% i</span><span class="s2">f sessions %}</span>
-<span class="s2">        {</span><span class="si">% f</span><span class="s2">or session_id, files in sessions.items() %}</span>
-<span class="s2">            &lt;div class=&quot;session&quot;&gt;</span>
-<span class="s2">                &lt;h2&gt;Session: {{ session_id }}&lt;/h2&gt;</span>
-
-<span class="s2">                {</span><span class="si">% i</span><span class="s2">f files.wav_files %}</span>
-<span class="s2">                    &lt;h3&gt;WAV Files (Playable)&lt;/h3&gt;</span>
-<span class="s2">                    &lt;ul&gt;</span>
-<span class="s2">                    {</span><span class="si">% f</span><span class="s2">or file_path in files.wav_files %}</span>
-<span class="s2">                        {</span><span class="si">% s</span><span class="s2">et file_name = file_path.split(&#39;/&#39;)[-1] %}</span>
-<span class="s2">                        &lt;li&gt;</span>
-<span class="s2">                            &lt;div&gt;{{ file_name }}&lt;/div&gt;</span>
-<span class="s2">                            &lt;audio controls&gt;</span>
-<span class="s2">                                &lt;source src=&quot;/files/{{ file_path }}&quot; type=&quot;audio/wav&quot;&gt;</span>
-<span class="s2">                                Your browser does not support the audio element.</span>
-<span class="s2">                            &lt;/audio&gt;</span>
-<span class="s2">                        &lt;/li&gt;</span>
-<span class="s2">                    {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-<span class="s2">                    &lt;/ul&gt;</span>
-<span class="s2">                {</span><span class="si">% e</span><span class="s2">ndif %}</span>
-
-<span class="s2">                {</span><span class="si">% i</span><span class="s2">f files.bin_files %}</span>
-<span class="s2">                    &lt;h3&gt;Raw Binary Files&lt;/h3&gt;</span>
-<span class="s2">                    &lt;ul&gt;</span>
-<span class="s2">                    {</span><span class="si">% f</span><span class="s2">or file_path in files.bin_files %}</span>
-<span class="s2">                        {</span><span class="si">% s</span><span class="s2">et file_name = file_path.split(&#39;/&#39;)[-1] %}</span>
-<span class="s2">                        &lt;li&gt;</span>
-<span class="s2">                            &lt;a href=&quot;/files/{{ file_path }}&quot;&gt;{{ file_name }}&lt;/a&gt;</span>
-<span class="s2">                        &lt;/li&gt;</span>
-<span class="s2">                    {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-<span class="s2">                    &lt;/ul&gt;</span>
-<span class="s2">                {</span><span class="si">% e</span><span class="s2">ndif %}</span>
-<span class="s2">            &lt;/div&gt;</span>
-<span class="s2">        {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-<span class="s2">    {</span><span class="si">% e</span><span class="s2">lse %}</span>
-<span class="s2">        &lt;p&gt;No audio recordings found.&lt;/p&gt;</span>
-<span class="s2">    {</span><span class="si">% e</span><span class="s2">ndif %}</span>
-<span class="s2">&lt;/body&gt;</span>
-<span class="s2">&lt;/html&gt;</span>
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="k">class</span> <span class="nc">StreamingService</span><span class="p">(</span><span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">StreamingServicer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">segments</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Dictionary to track all active segments</span>
-
-    <span class="k">def</span> <span class="nf">Stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_iterator</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="c1"># Create output directory</span>
-        <span class="n">Path</span><span class="p">(</span><span class="n">OUTPUT_FOLDER</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">request_iterator</span><span class="p">:</span>
-            <span class="n">session_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">session_id</span>
-
-            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;dialog_init&#39;</span><span class="p">):</span>
-                <span class="n">dialog_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">dialog_init</span><span class="o">.</span><span class="n">dialog</span><span class="o">.</span><span class="n">id</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">: DialogInit, dialog_id: </span><span class="si">{</span><span class="n">dialog_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">create_session_dir</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
-                <span class="n">write_session_logs</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;DialogInit: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;segment_start&#39;</span><span class="p">):</span>
-                <span class="n">segment_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_start</span><span class="o">.</span><span class="n">segment_id</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">: SegmentStart, segment_id: </span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Create entry for this segment</span>
-                <span class="n">segment_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;session_id&#39;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
-                    <span class="s1">&#39;segment_id&#39;</span><span class="p">:</span> <span class="n">segment_id</span><span class="p">,</span>
-                    <span class="s1">&#39;audio_format&#39;</span><span class="p">:</span> <span class="p">{},</span>
-                    <span class="s1">&#39;audio_data&#39;</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">()</span>
-                <span class="p">}</span>
-
-                <span class="c1"># Extract audio format from segment_start if available</span>
-                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_start</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;audio_format&#39;</span><span class="p">):</span>
-                    <span class="n">fmt</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_start</span><span class="o">.</span><span class="n">audio_format</span>
-                    <span class="n">codec_name</span> <span class="o">=</span> <span class="n">ringcx_streaming_pb2</span><span class="o">.</span><span class="n">Codec</span><span class="o">.</span><span class="n">Name</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">codec</span><span class="p">)</span>
-
-                    <span class="c1"># Store audio format for this specific segment</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">][</span><span class="s1">&#39;audio_format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s1">&#39;encoding&#39;</span><span class="p">:</span> <span class="n">codec_name</span><span class="p">,</span>
-                        <span class="s1">&#39;sample_rate&#39;</span><span class="p">:</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
-                        <span class="s1">&#39;channels&#39;</span><span class="p">:</span> <span class="mi">1</span>  <span class="c1"># Default to mono</span>
-                    <span class="p">}</span>
-
-                    <span class="c1"># Set sample width based on codec</span>
-                    <span class="k">if</span> <span class="n">codec_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PCMA&#39;</span><span class="p">,</span> <span class="s1">&#39;PCMU&#39;</span><span class="p">]:</span>  <span class="c1"># A-law and μ-law are 8-bit</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">][</span><span class="s1">&#39;audio_format&#39;</span><span class="p">][</span><span class="s1">&#39;sample_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="k">elif</span> <span class="n">codec_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;L16&#39;</span><span class="p">,</span> <span class="s1">&#39;LINEAR16&#39;</span><span class="p">]:</span>  <span class="c1"># 16-bit PCM</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">][</span><span class="s1">&#39;audio_format&#39;</span><span class="p">][</span><span class="s1">&#39;sample_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-
-            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;segment_media&#39;</span><span class="p">):</span>
-                <span class="n">segment_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_media</span><span class="o">.</span><span class="n">segment_id</span>
-                <span class="n">payload</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_media</span><span class="o">.</span><span class="n">audio_content</span><span class="o">.</span><span class="n">payload</span>
-                <span class="n">seq</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_media</span><span class="o">.</span><span class="n">audio_content</span><span class="o">.</span><span class="n">seq</span>
-
-                <span class="n">segment_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">: SegmentMedia, segment_id: </span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">, seq: </span><span class="si">{</span><span class="n">seq</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Store audio data</span>
-                <span class="k">if</span> <span class="n">segment_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
-                    <span class="c1"># Save audio content to file</span>
-                    <span class="n">write_audio_content</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">segment_id</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
-                    <span class="c1"># Append to in-memory buffer</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">][</span><span class="s1">&#39;audio_data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-
-            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;segment_stop&#39;</span><span class="p">):</span>
-                <span class="n">segment_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">segment_stop</span><span class="o">.</span><span class="n">segment_id</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">: SegmentStop, segment_id: </span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Process completed segment</span>
-                <span class="n">segment_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">if</span> <span class="n">segment_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
-                    <span class="c1"># Convert audio to WAV for playback</span>
-                    <span class="n">audio_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">][</span><span class="s1">&#39;audio_format&#39;</span><span class="p">]</span>
-                    <span class="n">convert_bin_to_wav</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">segment_id</span><span class="p">,</span> <span class="n">audio_format</span><span class="p">)</span>
-
-                    <span class="c1"># Clean up</span>
-                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">]</span>
-
-        <span class="c1"># Clean up any remaining segments</span>
-        <span class="n">segments_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">segment_key</span> <span class="ow">in</span> <span class="n">segments_to_remove</span><span class="p">:</span>
-            <span class="n">segment_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">]</span>
-            <span class="n">session_id</span> <span class="o">=</span> <span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;session_id&#39;</span><span class="p">]</span>
-            <span class="n">segment_id</span> <span class="o">=</span> <span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;segment_id&#39;</span><span class="p">]</span>
-
-            <span class="c1"># Convert to WAV</span>
-            <span class="n">audio_format</span> <span class="o">=</span> <span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;audio_format&#39;</span><span class="p">]</span>
-            <span class="n">convert_bin_to_wav</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">segment_id</span><span class="p">,</span> <span class="n">audio_format</span><span class="p">)</span>
-
-            <span class="c1"># Clean up</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_key</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">Empty</span><span class="p">()</span>
-
-
-<span class="k">def</span> <span class="nf">serve</span><span class="p">(</span><span class="n">server_ip</span><span class="p">,</span> <span class="n">grpc_port</span><span class="p">,</span> <span class="n">grpc_secure_port</span><span class="p">):</span>
-    <span class="n">server</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">server</span><span class="p">(</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
-    <span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">add_StreamingServicer_to_server</span><span class="p">(</span><span class="n">StreamingService</span><span class="p">(),</span> <span class="n">server</span><span class="p">)</span>
-
-    <span class="c1"># Insecure port</span>
-    <span class="n">server_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">server_ip</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">grpc_port</span><span class="si">}</span><span class="s1">&#39;</span>
-    <span class="n">server</span><span class="o">.</span><span class="n">add_insecure_port</span><span class="p">(</span><span class="n">server_address</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gRPC server started at </span><span class="si">{</span><span class="n">server_address</span><span class="si">}</span><span class="s1"> (insecure)&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Secure port if SSL certificates are available</span>
-    <span class="n">cert_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_CERT_FILE&#39;</span><span class="p">)</span>
-    <span class="n">key_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_KEY_FILE&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">cert_file</span> <span class="ow">and</span> <span class="n">key_file</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cert_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key_file</span><span class="p">):</span>
-        <span class="n">secure_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">server_ip</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">grpc_secure_port</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cert_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">cert_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">key_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">key_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-        <span class="n">server_credentials</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_server_credentials</span><span class="p">([(</span><span class="n">key_data</span><span class="p">,</span> <span class="n">cert_data</span><span class="p">)])</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">add_secure_port</span><span class="p">(</span><span class="n">secure_address</span><span class="p">,</span> <span class="n">server_credentials</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gRPC server started with SSL at </span><span class="si">{</span><span class="n">secure_address</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="n">server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">server</span>
-
-<span class="k">def</span> <span class="nf">configure_logger</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">log_filename</span><span class="p">):</span>
-    <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-    <span class="n">_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
-
-    <span class="n">console_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
-    <span class="n">console_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
-
-    <span class="n">file_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_filename</span><span class="p">)</span>
-    <span class="n">file_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
-
-    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">console_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
-    <span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
-
-    <span class="n">_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
-    <span class="n">_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">_logger</span>
-
-
-<span class="k">def</span> <span class="nf">create_session_dir</span><span class="p">(</span><span class="n">session_id</span><span class="p">):</span>
-    <span class="n">output_folder_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">OUTPUT_FOLDER</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">output_folder_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">write_session_logs</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">OUTPUT_FOLDER</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s1">/session.log&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">write_audio_content</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">segment_id</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">OUTPUT_FOLDER</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s1">.bin&#39;</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">convert_bin_to_wav</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">segment_id</span><span class="p">,</span> <span class="n">audio_format</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert binary audio file to WAV format&quot;&quot;&quot;</span>
-    <span class="n">bin_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">OUTPUT_FOLDER</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s1">.bin&#39;</span>
-    <span class="n">wav_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">OUTPUT_FOLDER</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s1">.wav&#39;</span>
-
-    <span class="c1"># Check if binary file exists and has content</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bin_file</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">bin_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Binary file </span><span class="si">{</span><span class="n">bin_file</span><span class="si">}</span><span class="s2"> is empty or doesn&#39;t exist&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
-
-    <span class="c1"># Ensure we have the minimum required audio format parameters</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">audio_format</span> <span class="ow">or</span> <span class="s1">&#39;sample_rate&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">audio_format</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing audio format information for </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
-
-    <span class="c1"># Set default values if not provided</span>
-    <span class="n">channels</span> <span class="o">=</span> <span class="n">audio_format</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;channels&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Default to mono</span>
-    <span class="n">sample_width</span> <span class="o">=</span> <span class="n">audio_format</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sample_width&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Default to 8-bit</span>
-    <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">audio_format</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sample_rate&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">)</span>  <span class="c1"># Default to 8kHz</span>
-    <span class="n">encoding</span> <span class="o">=</span> <span class="n">audio_format</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;PCMU&#39;</span><span class="p">)</span>  <span class="c1"># Default to PCM</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Read binary data</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bin_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">audio_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-        <span class="c1"># Convert based on codec type</span>
-        <span class="k">if</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s1">&#39;PCMA&#39;</span><span class="p">:</span>  <span class="c1"># A-law</span>
-            <span class="c1"># Convert A-law to PCM (2 bytes per sample)</span>
-            <span class="n">audio_data</span> <span class="o">=</span> <span class="n">audioop</span><span class="o">.</span><span class="n">alaw2lin</span><span class="p">(</span><span class="n">audio_data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">sample_width</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># A-law conversion results in 16-bit PCM</span>
-
-        <span class="k">elif</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s1">&#39;PCMU&#39;</span><span class="p">:</span>  <span class="c1"># μ-law</span>
-            <span class="c1"># Convert μ-law to PCM (2 bytes per sample)</span>
-            <span class="n">audio_data</span> <span class="o">=</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ulaw2lin</span><span class="p">(</span><span class="n">audio_data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">sample_width</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># μ-law conversion results in 16-bit PCM</span>
-
-        <span class="k">elif</span> <span class="n">encoding</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;L16&#39;</span><span class="p">,</span> <span class="s1">&#39;LINEAR16&#39;</span><span class="p">]:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported codec: </span><span class="si">{</span><span class="n">encoding</span><span class="si">}</span><span class="s2">, using raw data&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Create WAV file</span>
-        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">wav_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">wf</span><span class="p">:</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">setnchannels</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">setsampwidth</span><span class="p">(</span><span class="n">sample_width</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">setframerate</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">audio_data</span><span class="p">)</span>
-
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted </span><span class="si">{</span><span class="n">bin_file</span><span class="si">}</span><span class="s2"> to WAV format: </span><span class="si">{</span><span class="n">wav_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error converting </span><span class="si">{</span><span class="n">bin_file</span><span class="si">}</span><span class="s2"> to WAV: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">get_all_files</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[]</span>
-
-    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-            <span class="n">creation_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-            <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">file_path</span><span class="p">,</span> <span class="n">creation_time</span><span class="p">))</span>
-
-    <span class="n">file_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">]</span>
-
-
-<span class="k">def</span> <span class="nf">run_flask</span><span class="p">(</span><span class="n">http_port</span><span class="p">):</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting Flask server on port </span><span class="si">{</span><span class="n">http_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">http_port</span><span class="p">,</span> <span class="n">threaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/health&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">healthcheck</span><span class="p">():</span>
-    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">200</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">list_files</span><span class="p">():</span>
-    <span class="c1"># Group files by session ID</span>
-    <span class="n">sessions</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="c1"># Get all files</span>
-    <span class="n">all_files</span> <span class="o">=</span> <span class="n">get_all_files</span><span class="p">(</span><span class="n">OUTPUT_FOLDER</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">all_files</span><span class="p">:</span>
-        <span class="c1"># Skip session log files from the main listing</span>
-        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/session.log&#39;</span><span class="p">):</span>
-            <span class="k">continue</span>
-
-        <span class="n">parts</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-        <span class="n">file_name</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="s1">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">file_name</span><span class="p">:</span>
-            <span class="c1"># For session_segment named files</span>
-            <span class="n">session_segment</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Remove extension</span>
-            <span class="k">if</span> <span class="n">session_segment</span><span class="p">:</span>
-                <span class="n">parts</span> <span class="o">=</span> <span class="n">session_segment</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">session_id</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">session_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
-                        <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;wav_files&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;bin_files&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-
-                    <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.wav&#39;</span><span class="p">):</span>
-                        <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;wav_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.bin&#39;</span><span class="p">):</span>
-                        <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;bin_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="c1"># For files organized in session directories</span>
-            <span class="n">session_id</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">session_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
-                <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;wav_files&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;bin_files&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-
-            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.wav&#39;</span><span class="p">):</span>
-                <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;wav_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.bin&#39;</span><span class="p">):</span>
-                <span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;bin_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-
-    <span class="c1"># Sort sessions and files</span>
-    <span class="n">sorted_sessions</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">sorted_sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;wav_files&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;wav_files&#39;</span><span class="p">]),</span>
-            <span class="s1">&#39;bin_files&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s1">&#39;bin_files&#39;</span><span class="p">])</span>
-        <span class="p">}</span>
-
-    <span class="k">return</span> <span class="n">render_template_string</span><span class="p">(</span><span class="n">HTML_TEMPLATE</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sorted_sessions</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/files/&lt;path:filename&gt;&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.log&#39;</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">file_content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">file_content</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/files&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">api_list_files</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;API endpoint to list all audio files&quot;&quot;&quot;</span>
-    <span class="n">wav_files</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">OUTPUT_FOLDER</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.wav&#39;</span><span class="p">):</span>
-                <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-                <span class="n">relative_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">OUTPUT_FOLDER</span><span class="p">)</span>
-                <span class="n">wav_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relative_path</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="n">wav_files</span><span class="p">})</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="c1"># Configuration with hardcoded values</span>
-    <span class="n">log_level</span> <span class="o">=</span> <span class="s1">&#39;INFO&#39;</span>
-    <span class="n">log_filename</span> <span class="o">=</span> <span class="s2">&quot;server.log&quot;</span>
-    <span class="n">server_ip</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span>
-    <span class="n">grpc_port</span> <span class="o">=</span> <span class="mi">10080</span>
-    <span class="n">grpc_secure_port</span> <span class="o">=</span> <span class="mi">443</span>
-    <span class="n">http_port</span> <span class="o">=</span> <span class="mi">8080</span>
-
-    <span class="c1"># Configure logger</span>
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">configure_logger</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">log_filename</span><span class="p">)</span>
-
-    <span class="c1"># Create output folders if they don&#39;t exist</span>
-    <span class="n">Path</span><span class="p">(</span><span class="n">OUTPUT_FOLDER</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Start gRPC server</span>
-    <span class="n">grpc_server</span> <span class="o">=</span> <span class="n">serve</span><span class="p">(</span><span class="n">server_ip</span><span class="p">,</span> <span class="n">grpc_port</span><span class="p">,</span> <span class="n">grpc_secure_port</span><span class="p">)</span>
-
-    <span class="c1"># Start Flask server in a separate thread</span>
-    <span class="n">flask_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_flask</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">http_port</span><span class="p">,))</span>
-    <span class="n">flask_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">flask_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
-    <span class="c1"># Keep the main thread running</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">86400</span><span class="p">)</span>  <span class="c1"># Sleep for a day</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server shutdown initiated&quot;</span><span class="p">)</span>
-        <span class="n">grpc_server</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div>
+<pre class="codehilite"><code class="language-python">import os
+import grpc
+import logging
+import threading
+import wave
+from pathlib import Path
+from concurrent import futures
+from google.protobuf.empty_pb2 import Empty
+from flask import Flask, send_file, Response, render_template_string, jsonify
+import time
+import ringcx_streaming_pb2
+import ringcx_streaming_pb2_grpc
+import audioop
+import queue
+
+app = Flask(__name__)
+OUTPUT_FOLDER = 'saved_audio'
+
+# HTML template for the web page
+HTML_TEMPLATE = &quot;&quot;&quot;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Audio Recordings&lt;/title&gt;
+    &lt;style&gt;
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        audio {
+            width: 100%;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.8em;
+        }
+        .session {
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Recorded Audio Files&lt;/h1&gt;
+
+    {% if sessions %}
+        {% for session_id, files in sessions.items() %}
+            &lt;div class=&quot;session&quot;&gt;
+                &lt;h2&gt;Session: {{ session_id }}&lt;/h2&gt;
+
+                {% if files.wav_files %}
+                    &lt;h3&gt;WAV Files (Playable)&lt;/h3&gt;
+                    &lt;ul&gt;
+                    {% for file_path in files.wav_files %}
+                        {% set file_name = file_path.split('/')[-1] %}
+                        &lt;li&gt;
+                            &lt;div&gt;{{ file_name }}&lt;/div&gt;
+                            &lt;audio controls&gt;
+                                &lt;source src=&quot;/files/{{ file_path }}&quot; type=&quot;audio/wav&quot;&gt;
+                                Your browser does not support the audio element.
+                            &lt;/audio&gt;
+                        &lt;/li&gt;
+                    {% endfor %}
+                    &lt;/ul&gt;
+                {% endif %}
+
+                {% if files.bin_files %}
+                    &lt;h3&gt;Raw Binary Files&lt;/h3&gt;
+                    &lt;ul&gt;
+                    {% for file_path in files.bin_files %}
+                        {% set file_name = file_path.split('/')[-1] %}
+                        &lt;li&gt;
+                            &lt;a href=&quot;/files/{{ file_path }}&quot;&gt;{{ file_name }}&lt;/a&gt;
+                        &lt;/li&gt;
+                    {% endfor %}
+                    &lt;/ul&gt;
+                {% endif %}
+            &lt;/div&gt;
+        {% endfor %}
+    {% else %}
+        &lt;p&gt;No audio recordings found.&lt;/p&gt;
+    {% endif %}
+&lt;/body&gt;
+&lt;/html&gt;
+&quot;&quot;&quot;
+
+class StreamingService(ringcx_streaming_pb2_grpc.StreamingServicer):
+    def __init__(self):
+        self.segments = {}  # Dictionary to track all active segments
+
+    def Stream(self, request_iterator, context):
+        # Create output directory
+        Path(OUTPUT_FOLDER).mkdir(exist_ok=True)
+
+        for event in request_iterator:
+            session_id = event.session_id
+
+            if event.HasField('dialog_init'):
+                dialog_id = event.dialog_init.dialog.id
+                logger.info(f&quot;{session_id}: DialogInit, dialog_id: {dialog_id}&quot;)
+                create_session_dir(session_id)
+                write_session_logs(session_id, f&quot;DialogInit: {event}&quot;)
+
+            elif event.HasField('segment_start'):
+                segment_id = event.segment_start.segment_id
+                logger.info(f&quot;{session_id}: SegmentStart, segment_id: {segment_id}&quot;)
+
+                # Create entry for this segment
+                segment_key = f&quot;{session_id}_{segment_id}&quot;
+                self.segments[segment_key] = {
+                    'session_id': session_id,
+                    'segment_id': segment_id,
+                    'audio_format': {},
+                    'audio_data': bytearray()
+                }
+
+                # Extract audio format from segment_start if available
+                if event.segment_start.HasField('audio_format'):
+                    fmt = event.segment_start.audio_format
+                    codec_name = ringcx_streaming_pb2.Codec.Name(fmt.codec)
+
+                    # Store audio format for this specific segment
+                    self.segments[segment_key]['audio_format'] = {
+                        'encoding': codec_name,
+                        'sample_rate': fmt.rate,
+                        'channels': 1  # Default to mono
+                    }
+
+                    # Set sample width based on codec
+                    if codec_name in ['PCMA', 'PCMU']:  # A-law and μ-law are 8-bit
+                        self.segments[segment_key]['audio_format']['sample_width'] = 1
+                    elif codec_name in ['L16', 'LINEAR16']:  # 16-bit PCM
+                        self.segments[segment_key]['audio_format']['sample_width'] = 2
+
+            elif event.HasField('segment_media'):
+                segment_id = event.segment_media.segment_id
+                payload = event.segment_media.audio_content.payload
+                seq = event.segment_media.audio_content.seq
+
+                segment_key = f&quot;{session_id}_{segment_id}&quot;
+                logger.debug(f&quot;{session_id}: SegmentMedia, segment_id: {segment_id}, seq: {seq}&quot;)
+
+                # Store audio data
+                if segment_key in self.segments:
+                    # Save audio content to file
+                    write_audio_content(session_id, segment_id, payload)
+                    # Append to in-memory buffer
+                    self.segments[segment_key]['audio_data'].extend(payload)
+
+            elif event.HasField('segment_stop'):
+                segment_id = event.segment_stop.segment_id
+                logger.info(f&quot;{session_id}: SegmentStop, segment_id: {segment_id}&quot;)
+
+                # Process completed segment
+                segment_key = f&quot;{session_id}_{segment_id}&quot;
+                if segment_key in self.segments:
+                    # Convert audio to WAV for playback
+                    audio_format = self.segments[segment_key]['audio_format']
+                    convert_bin_to_wav(session_id, segment_id, audio_format)
+
+                    # Clean up
+                    del self.segments[segment_key]
+
+        # Clean up any remaining segments
+        segments_to_remove = list(self.segments.keys())
+        for segment_key in segments_to_remove:
+            segment_data = self.segments[segment_key]
+            session_id = segment_data['session_id']
+            segment_id = segment_data['segment_id']
+
+            # Convert to WAV
+            audio_format = segment_data['audio_format']
+            convert_bin_to_wav(session_id, segment_id, audio_format)
+
+            # Clean up
+            del self.segments[segment_key]
+
+        return Empty()
+
+
+def serve(server_ip, grpc_port, grpc_secure_port):
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    ringcx_streaming_pb2_grpc.add_StreamingServicer_to_server(StreamingService(), server)
+
+    # Insecure port
+    server_address = f'{server_ip}:{grpc_port}'
+    server.add_insecure_port(server_address)
+    logger.info(f'gRPC server started at {server_address} (insecure)')
+
+    # Secure port if SSL certificates are available
+    cert_file = os.environ.get('SSL_CERT_FILE')
+    key_file = os.environ.get('SSL_KEY_FILE')
+
+    if cert_file and key_file and os.path.exists(cert_file) and os.path.exists(key_file):
+        secure_address = f'{server_ip}:{grpc_secure_port}'
+        with open(cert_file, 'rb') as f:
+            cert_data = f.read()
+        with open(key_file, 'rb') as f:
+            key_data = f.read()
+
+        server_credentials = grpc.ssl_server_credentials([(key_data, cert_data)])
+        server.add_secure_port(secure_address, server_credentials)
+        logger.info(f'gRPC server started with SSL at {secure_address}')
+
+    server.start()
+    return server
+
+def configure_logger(log_level, log_filename):
+    _logger = logging.getLogger(__name__)
+    _logger.setLevel(log_level)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+
+    file_handler = logging.FileHandler(log_filename)
+    file_handler.setLevel(log_level)
+
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+
+    _logger.addHandler(console_handler)
+    _logger.addHandler(file_handler)
+    return _logger
+
+
+def create_session_dir(session_id):
+    output_folder_path = Path(f&quot;{OUTPUT_FOLDER}/{session_id}&quot;)
+    output_folder_path.mkdir(parents=True, exist_ok=True)
+
+def write_session_logs(session_id, msg):
+    with open(f'{OUTPUT_FOLDER}/{session_id}/session.log', 'a') as file:
+        file.write(f&quot;{msg}\n&quot;)
+
+def write_audio_content(session_id, segment_id, payload):
+    with open(f'{OUTPUT_FOLDER}/{session_id}/{segment_id}.bin', 'ab') as file:
+        file.write(payload)
+
+def convert_bin_to_wav(session_id, segment_id, audio_format):
+    &quot;&quot;&quot;Convert binary audio file to WAV format&quot;&quot;&quot;
+    bin_file = f'{OUTPUT_FOLDER}/{session_id}/{segment_id}.bin'
+    wav_file = f'{OUTPUT_FOLDER}/{session_id}_{segment_id}.wav'
+
+    # Check if binary file exists and has content
+    if not os.path.exists(bin_file) or os.path.getsize(bin_file) == 0:
+        logger.warning(f&quot;Binary file {bin_file} is empty or doesn't exist&quot;)
+        return
+
+    # Ensure we have the minimum required audio format parameters
+    if not audio_format or 'sample_rate' not in audio_format:
+        logger.warning(f&quot;Missing audio format information for {session_id}_{segment_id}&quot;)
+        return
+
+    # Set default values if not provided
+    channels = audio_format.get('channels', 1)  # Default to mono
+    sample_width = audio_format.get('sample_width', 1)  # Default to 8-bit
+    sample_rate = audio_format.get('sample_rate', 8000)  # Default to 8kHz
+    encoding = audio_format.get('encoding', 'PCMU')  # Default to PCM
+
+    try:
+        # Read binary data
+        with open(bin_file, 'rb') as f:
+            audio_data = f.read()
+
+        # Convert based on codec type
+        if encoding == 'PCMA':  # A-law
+            # Convert A-law to PCM (2 bytes per sample)
+            audio_data = audioop.alaw2lin(audio_data, 2)
+            sample_width = 2  # A-law conversion results in 16-bit PCM
+
+        elif encoding == 'PCMU':  # μ-law
+            # Convert μ-law to PCM (2 bytes per sample)
+            audio_data = audioop.ulaw2lin(audio_data, 2)
+            sample_width = 2  # μ-law conversion results in 16-bit PCM
+
+        elif encoding not in ['L16', 'LINEAR16']:
+            logger.warning(f&quot;Unsupported codec: {encoding}, using raw data&quot;)
+
+        # Create WAV file
+        with wave.open(wav_file, 'wb') as wf:
+            wf.setnchannels(channels)
+            wf.setsampwidth(sample_width)
+            wf.setframerate(sample_rate)
+            wf.writeframes(audio_data)
+
+        logger.info(f&quot;Converted {bin_file} to WAV format: {wav_file}&quot;)
+    except Exception as e:
+        logger.error(f&quot;Error converting {bin_file} to WAV: {e}&quot;)
+
+
+def get_all_files(directory):
+    if not os.path.exists(directory):
+        return []
+
+    file_list = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            creation_time = os.path.getctime(file_path)
+            file_list.append((file_path, creation_time))
+
+    file_list.sort(reverse=True, key=lambda x: x[1])
+    return [file[0] for file in file_list]
+
+
+def run_flask(http_port):
+    logger.info(f&quot;Starting Flask server on port {http_port}&quot;)
+    app.run(host=&quot;0.0.0.0&quot;, port=http_port, threaded=True)
+
+@app.route('/health')
+def healthcheck():
+    return '', 200
+
+@app.route('/')
+def list_files():
+    # Group files by session ID
+    sessions = {}
+
+    # Get all files
+    all_files = get_all_files(OUTPUT_FOLDER)
+
+    for file_path in all_files:
+        # Skip session log files from the main listing
+        if file_path.endswith('/session.log'):
+            continue
+
+        parts = file_path.split('/')
+        file_name = parts[-1]
+
+        if '_' in file_name:
+            # For session_segment named files
+            session_segment = file_name.split('.')[0]  # Remove extension
+            if session_segment:
+                parts = session_segment.split('_')
+                if len(parts) &gt;= 2:
+                    session_id = parts[0]
+                    if session_id not in sessions:
+                        sessions[session_id] = {'wav_files': [], 'bin_files': []}
+
+                    if file_name.endswith('.wav'):
+                        sessions[session_id]['wav_files'].append(file_path)
+                    elif file_name.endswith('.bin'):
+                        sessions[session_id]['bin_files'].append(file_path)
+        elif len(parts) &gt; 2:
+            # For files organized in session directories
+            session_id = parts[-2]
+            if session_id not in sessions:
+                sessions[session_id] = {'wav_files': [], 'bin_files': []}
+
+            if file_name.endswith('.wav'):
+                sessions[session_id]['wav_files'].append(file_path)
+            elif file_name.endswith('.bin'):
+                sessions[session_id]['bin_files'].append(file_path)
+
+    # Sort sessions and files
+    sorted_sessions = {}
+    for session_id in sorted(sessions.keys(), reverse=True):
+        sorted_sessions[session_id] = {
+            'wav_files': sorted(sessions[session_id]['wav_files']),
+            'bin_files': sorted(sessions[session_id]['bin_files'])
+        }
+
+    return render_template_string(HTML_TEMPLATE, sessions=sorted_sessions)
+
+@app.route('/files/&lt;path:filename&gt;')
+def download_file(filename):
+    if filename.endswith('.log'):
+        with open(filename, 'r') as f:
+            file_content = f.read()
+        return Response(file_content, content_type='text/plain')
+    return send_file(filename)
+
+@app.route('/api/files')
+def api_list_files():
+    &quot;&quot;&quot;API endpoint to list all audio files&quot;&quot;&quot;
+    wav_files = []
+    for root, _, files in os.walk(OUTPUT_FOLDER):
+        for file in files:
+            if file.endswith('.wav'):
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, OUTPUT_FOLDER)
+                wav_files.append(relative_path)
+
+    return jsonify({&quot;files&quot;: wav_files})
+
+if __name__ == '__main__':
+    # Configuration with hardcoded values
+    log_level = 'INFO'
+    log_filename = &quot;server.log&quot;
+    server_ip = '0.0.0.0'
+    grpc_port = 10080
+    grpc_secure_port = 443
+    http_port = 8080
+
+    # Configure logger
+    logger = configure_logger(log_level, log_filename)
+
+    # Create output folders if they don't exist
+    Path(OUTPUT_FOLDER).mkdir(exist_ok=True)
+
+    # Start gRPC server
+    grpc_server = serve(server_ip, grpc_port, grpc_secure_port)
+
+    # Start Flask server in a separate thread
+    flask_thread = threading.Thread(target=run_flask, args=(http_port,))
+    flask_thread.daemon = True
+    flask_thread.start()
+
+    # Keep the main thread running
+    try:
+        while True:
+            time.sleep(86400)  # Sleep for a day
+    except KeyboardInterrupt:
+        logger.info(&quot;Server shutdown initiated&quot;)
+        grpc_server.stop(0)
+</code></pre>
 
 
 
 </details>
 
-<div class="codehilite"><pre><span></span><code><span class="c1"># Install additional required packages (if you haven&#39;t done this above)</span>
-pip<span class="w"> </span>install<span class="w"> </span>flask
+<pre class="codehilite"><code class="language-bash"># Install additional required packages (if you haven't done this above)
+pip install flask
 
-<span class="c1"># Export SSL environment variables as before</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_CERT_FILE</span><span class="o">=</span>/path/to/server.crt
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_KEY_FILE</span><span class="o">=</span>/path/to/server.key
-<span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">443</span>
+# Export SSL environment variables as before
+export SSL_CERT_FILE=/path/to/server.crt
+export SSL_KEY_FILE=/path/to/server.key
+export PORT=443
 
-<span class="c1"># Run the file server</span>
-python<span class="w"> </span>file_server.py
-</code></pre></div>
+# Run the file server
+python file_server.py
+</code></pre>
 
 <p>The <code>file_server.py</code> script will:
 - Save incoming audio streams as binary files
@@ -1098,130 +1098,130 @@ python<span class="w"> </span>file_server.py
 <summary>Click to expand transcribe_server.py</summary>
 
 
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">grpc</span>
-<span class="kn">import</span> <span class="nn">concurrent.futures</span>
-<span class="kn">import</span> <span class="nn">signal</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">google.cloud</span> <span class="kn">import</span> <span class="n">speech</span>
-<span class="kn">import</span> <span class="nn">ringcx_streaming_pb2_grpc</span>
-<span class="kn">from</span> <span class="nn">google.protobuf.empty_pb2</span> <span class="kn">import</span> <span class="n">Empty</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<pre class="codehilite"><code class="language-python">import grpc
+import concurrent.futures
+import signal
+import sys
+import traceback
+import os
+from google.cloud import speech
+import ringcx_streaming_pb2_grpc
+from google.protobuf.empty_pb2 import Empty
+import logging
 
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
-    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)]</span>
-<span class="p">)</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;speech-server&#39;</span><span class="p">)</span>
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger('speech-server')
 
-<span class="k">class</span> <span class="nc">StreamingService</span><span class="p">(</span><span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">StreamingServicer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">Stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_iterator</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server started, waiting for audio stream...&quot;</span><span class="p">)</span>
+class StreamingService(ringcx_streaming_pb2_grpc.StreamingServicer):
+    def Stream(self, request_iterator, context):
+        logger.info(&quot;Server started, waiting for audio stream...&quot;)
 
-        <span class="n">client</span> <span class="o">=</span> <span class="n">speech</span><span class="o">.</span><span class="n">SpeechClient</span><span class="p">()</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">speech</span><span class="o">.</span><span class="n">RecognitionConfig</span><span class="p">(</span>
-            <span class="n">encoding</span><span class="o">=</span><span class="n">speech</span><span class="o">.</span><span class="n">RecognitionConfig</span><span class="o">.</span><span class="n">AudioEncoding</span><span class="o">.</span><span class="n">MULAW</span><span class="p">,</span>
-            <span class="n">sample_rate_hertz</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span>
-            <span class="n">language_code</span><span class="o">=</span><span class="s2">&quot;en-US&quot;</span><span class="p">,</span>
-            <span class="n">enable_automatic_punctuation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">streaming_config</span> <span class="o">=</span> <span class="n">speech</span><span class="o">.</span><span class="n">StreamingRecognitionConfig</span><span class="p">(</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-            <span class="n">interim_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
+        client = speech.SpeechClient()
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.MULAW,
+            sample_rate_hertz=8000,
+            language_code=&quot;en-US&quot;,
+            enable_automatic_punctuation=True,
+        )
+        streaming_config = speech.StreamingRecognitionConfig(
+            config=config,
+            interim_results=True,
+        )
 
-        <span class="k">def</span> <span class="nf">audio_generator</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">stream_event</span> <span class="ow">in</span> <span class="n">request_iterator</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">stream_event</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s1">&#39;segment_media&#39;</span><span class="p">):</span>
-                    <span class="k">yield</span> <span class="n">speech</span><span class="o">.</span><span class="n">StreamingRecognizeRequest</span><span class="p">(</span>
-                        <span class="n">audio_content</span><span class="o">=</span><span class="n">stream_event</span><span class="o">.</span><span class="n">segment_media</span><span class="o">.</span><span class="n">audio_content</span><span class="o">.</span><span class="n">payload</span>
-                    <span class="p">)</span>
+        def audio_generator():
+            for stream_event in request_iterator:
+                if stream_event.HasField('segment_media'):
+                    yield speech.StreamingRecognizeRequest(
+                        audio_content=stream_event.segment_media.audio_content.payload
+                    )
 
-        <span class="k">try</span><span class="p">:</span>            
-            <span class="n">responses</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">streaming_recognize</span><span class="p">(</span>
-                <span class="n">config</span><span class="o">=</span><span class="n">streaming_config</span><span class="p">,</span>
-                <span class="n">requests</span><span class="o">=</span><span class="n">audio_generator</span><span class="p">()</span>
-            <span class="p">)</span>
+        try:            
+            responses = client.streaming_recognize(
+                config=streaming_config,
+                requests=audio_generator()
+            )
 
-            <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-                    <span class="k">continue</span>
+            for response in responses:
+                if not response.results:
+                    continue
 
-                <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">is_final</span><span class="p">:</span>
-                    <span class="n">transcript</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">alternatives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transcript</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transcription: </span><span class="si">{</span><span class="n">transcript</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                result = response.results[0]
+                if result.is_final:
+                    transcript = result.alternatives[0].transcript
+                    logger.info(f&quot;Transcription: {transcript}&quot;)
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Transcription completed.&quot;</span><span class="p">)</span>
+            logger.info(&quot;Transcription completed.&quot;)
 
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during transcription: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">context</span><span class="o">.</span><span class="n">set_code</span><span class="p">(</span><span class="n">grpc</span><span class="o">.</span><span class="n">StatusCode</span><span class="o">.</span><span class="n">INTERNAL</span><span class="p">)</span>
-            <span class="n">context</span><span class="o">.</span><span class="n">set_details</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transcription error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        except Exception as e:
+            logger.error(f&quot;Error during transcription: {e}&quot;)
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f&quot;Transcription error: {str(e)}&quot;)
 
-        <span class="k">return</span> <span class="n">Empty</span><span class="p">()</span>
+        return Empty()
 
-<span class="k">def</span> <span class="nf">serve</span><span class="p">():</span>
-    <span class="n">server</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">server</span><span class="p">(</span><span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
-    <span class="n">ringcx_streaming_pb2_grpc</span><span class="o">.</span><span class="n">add_StreamingServicer_to_server</span><span class="p">(</span>
-        <span class="n">StreamingService</span><span class="p">(),</span> <span class="n">server</span>
-    <span class="p">)</span>
+def serve():
+    server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
+    ringcx_streaming_pb2_grpc.add_StreamingServicer_to_server(
+        StreamingService(), server
+    )
 
-    <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PORT&quot;</span><span class="p">,</span> <span class="mi">443</span><span class="p">))</span> <span class="c1"># We only support 443 port at the moment</span>
-    <span class="n">host</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span>
-    <span class="n">server_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s1">&#39;</span>
+    port = int(os.environ.get(&quot;PORT&quot;, 443)) # We only support 443 port at the moment
+    host = '0.0.0.0'
+    server_address = f'{host}:{port}'
 
-    <span class="n">cert_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_CERT_FILE&#39;</span><span class="p">)</span>
-    <span class="n">key_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSL_KEY_FILE&#39;</span><span class="p">)</span>
+    cert_file = os.environ.get('SSL_CERT_FILE')
+    key_file = os.environ.get('SSL_KEY_FILE')
 
-    <span class="k">if</span> <span class="n">cert_file</span> <span class="ow">and</span> <span class="n">key_file</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cert_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key_file</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cert_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">cert_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">key_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">key_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    if cert_file and key_file and os.path.exists(cert_file) and os.path.exists(key_file):
+        with open(cert_file, 'rb') as f:
+            cert_data = f.read()
+        with open(key_file, 'rb') as f:
+            key_data = f.read()
 
-        <span class="n">server_credentials</span> <span class="o">=</span> <span class="n">grpc</span><span class="o">.</span><span class="n">ssl_server_credentials</span><span class="p">([(</span><span class="n">key_data</span><span class="p">,</span> <span class="n">cert_data</span><span class="p">)])</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">add_secure_port</span><span class="p">(</span><span class="n">server_address</span><span class="p">,</span> <span class="n">server_credentials</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server started with SSL at </span><span class="si">{</span><span class="n">server_address</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">add_insecure_port</span><span class="p">(</span><span class="n">server_address</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server started without SSL at </span><span class="si">{</span><span class="n">server_address</span><span class="si">}</span><span class="s2"> (insecure)&quot;</span><span class="p">)</span>
+        server_credentials = grpc.ssl_server_credentials([(key_data, cert_data)])
+        server.add_secure_port(server_address, server_credentials)
+        logger.info(f&quot;Server started with SSL at {server_address}&quot;)
+    else:
+        server.add_insecure_port(server_address)
+        logger.info(f&quot;Server started without SSL at {server_address} (insecure)&quot;)
 
-    <span class="n">server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    server.start()
 
-    <span class="k">def</span> <span class="nf">graceful_shutdown</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Received signal to terminate. Shutting down server gracefully...&quot;</span><span class="p">)</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">grace</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server stopped successfully&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    def graceful_shutdown(signum, frame):
+        logger.info(&quot;Received signal to terminate. Shutting down server gracefully...&quot;)
+        server.stop(grace=5)
+        logger.info(&quot;Server stopped successfully&quot;)
+        sys.exit(0)
 
-    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">graceful_shutdown</span><span class="p">)</span>
-    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">graceful_shutdown</span><span class="p">)</span>
+    signal.signal(signal.SIGINT, graceful_shutdown)
+    signal.signal(signal.SIGTERM, graceful_shutdown)
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">wait_for_termination</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt received. Shutting down server gracefully...&quot;</span><span class="p">)</span>
-        <span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">grace</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Server stopped successfully&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+    try:
+        server.wait_for_termination()
+    except KeyboardInterrupt:
+        logger.info(&quot;Keyboard interrupt received. Shutting down server gracefully...&quot;)
+        server.stop(grace=5)
+        logger.info(&quot;Server stopped successfully&quot;)
+    except Exception as e:
+        logger.error(f&quot;Server error: {e}&quot;)
+        traceback.print_exc()
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting server&quot;</span><span class="p">)</span>
-        <span class="n">serve</span><span class="p">()</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Keyboard interrupt received. Exiting...&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Critical error in main loop: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> 
-</code></pre></div>
+if __name__ == '__main__':
+    try:
+        logger.info(&quot;Starting server&quot;)
+        serve()
+    except KeyboardInterrupt:
+        logger.info(&quot;Keyboard interrupt received. Exiting...&quot;)
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f&quot;Critical error in main loop: {e}&quot;)
+        traceback.print_exc()
+        sys.exit(1) 
+</code></pre>
 
 
 
@@ -1234,14 +1234,14 @@ python<span class="w"> </span>file_server.py
 <li>Create a service account and download credentials JSON file</li>
 <li>Set the environment variable to point to your credentials:</li>
 </ol>
-<div class="codehilite"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_APPLICATION_CREDENTIALS</span><span class="o">=</span>/path/to/your-credentials.json
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_CERT_FILE</span><span class="o">=</span>/path/to/server.crt
-<span class="nb">export</span><span class="w"> </span><span class="nv">SSL_KEY_FILE</span><span class="o">=</span>/path/to/server.key
-<span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">443</span>
+<pre class="codehilite"><code class="language-bash">export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your-credentials.json
+export SSL_CERT_FILE=/path/to/server.crt
+export SSL_KEY_FILE=/path/to/server.key
+export PORT=443
 
-<span class="c1"># Run the transcription server</span>
-python<span class="w"> </span>transcribe_server.py
-</code></pre></div>
+# Run the transcription server
+python transcribe_server.py
+</code></pre>
 
 <p>The transcription server will convert incoming audio to text in real-time and log the transcriptions. </p>
 <p>For design simplicity, it transcribes all content from both parties, which would have better text output if one party is audible and the other is muted.</p>
