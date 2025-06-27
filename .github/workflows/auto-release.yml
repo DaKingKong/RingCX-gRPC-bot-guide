@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - '*.*.*'
-    branches:
-      - release
 
 jobs:
   create-release:
@@ -28,38 +26,18 @@ jobs:
           ls -la
           echo "================================"
 
-      - name: Extract version from tag or branch
+      - name: Extract version from tag
         id: version
         run: |
           echo "=== Version Extraction ==="
           echo "GITHUB_REF: $GITHUB_REF"
           
-          # Check if this is a tag push or branch push
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            # Get the version from the tag
-            VERSION=${GITHUB_REF#refs/tags/}
-            echo "Detected tag push"
-            echo "Raw tag: $GITHUB_REF"
-            echo "Extracted version: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Extracted version from tag: $VERSION"
-          elif [[ "$GITHUB_REF" == refs/heads/release ]]; then
-            # For release branch, we need to determine the version
-            # This could be from a file, git commit, or other source
-            # For now, let's use a timestamp-based version
-            echo "Detected release branch push"
-            echo "Branch: $GITHUB_REF"
-            echo "Commit SHA: $(git rev-parse HEAD)"
-            echo "Short SHA: $(git rev-parse --short HEAD)"
-            VERSION="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
-            echo "Generated version: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Generated version for release branch: $VERSION"
-          else
-            echo "Error: Unexpected ref $GITHUB_REF"
-            echo "Expected: refs/tags/* or refs/heads/release"
-            exit 1
-          fi
+          # Extract version from the tag
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Raw tag: $GITHUB_REF"
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version from tag: $VERSION"
           echo "Final VERSION variable: $VERSION"
           echo "================================"
 
@@ -95,14 +73,15 @@ jobs:
             echo "Release notes file exists, proceeding with extraction..."
             
             # Debug: Show what we're looking for
-            echo "Looking for pattern: '^## $VERSION:'"
+            echo "Looking for patterns: '^## $VERSION:' or '^## $VERSION$'"
             
             # Use awk to extract content between ## version: and next ##
             # Fix the awk syntax by properly escaping the version variable
+            # Match both with and without colon
             echo "Running awk command..."
             RELEASE_NOTES=$(awk -v version="$VERSION" '
               BEGIN { in_section = 0; content = ""; print "DEBUG: Looking for version: " version }
-              $0 ~ "^## " version ":" { 
+              ($0 ~ "^## " version ":") || ($0 ~ "^## " version "$") { 
                 in_section = 1; 
                 print "DEBUG: Found section for version: " version;
                 next 
