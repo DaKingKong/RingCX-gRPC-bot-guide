@@ -80,22 +80,18 @@ jobs:
             # Match both with and without colon
             echo "Running awk command..."
             RELEASE_NOTES=$(awk -v version="$VERSION" '
-              BEGIN { in_section = 0; content = ""; print "DEBUG: Looking for version: " version }
+              BEGIN { in_section = 0; content = "" }
               ($0 ~ "^## " version ":") || ($0 ~ "^## " version "$") { 
                 in_section = 1; 
-                print "DEBUG: Found section for version: " version;
                 next 
               }
               /^## [0-9]/ && in_section { 
-                print "DEBUG: Found next version section, stopping";
                 exit 
               }
               in_section { 
-                content = content $0 "\n";
-                print "DEBUG: Added line to content: " $0
+                content = content $0 "\n"
               }
               END { 
-                print "DEBUG: Final content length: " length(content);
                 print content 
               }
             ' docs/release-notes.md)
