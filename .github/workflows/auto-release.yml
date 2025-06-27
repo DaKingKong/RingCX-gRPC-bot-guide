@@ -1,0 +1,73 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+    branches:
+      - release
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Get the version from the tag
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Extract release notes
+        id: release-notes
+        run: |
+          # Extract content between ## version and the next ##
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Read the release notes file
+          if [ -f "docs/release-notes.md" ]; then
+            # Use awk to extract content between ## version: and next ##
+            RELEASE_NOTES=$(awk -v version="$VERSION" '
+              BEGIN { in_section = 0; content = "" }
+              /^## '"$VERSION"':/ { in_section = 1; next }
+              /^## [0-9]/ && in_section { exit }
+              in_section { content = content $0 "\n" }
+              END { print content }
+            ' docs/release-notes.md)
+            
+            # Clean up the content (remove leading/trailing whitespace and empty lines)
+            RELEASE_NOTES=$(echo "$RELEASE_NOTES" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed '/^$/d')
+            
+            if [ -z "$RELEASE_NOTES" ]; then
+              echo "No release notes found for version $VERSION"
+              RELEASE_NOTES="No release notes available for this version."
+            fi
+            
+            echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+            echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            echo "Extracted release notes for version $VERSION"
+            echo "Preview of release notes:"
+            echo "$RELEASE_NOTES" | head -10
+          else
+            echo "Release notes file not found"
+            echo "release_notes=Release notes file not found." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ steps.version.outputs.version }}
+          body: ${{ steps.release-notes.outputs.release_notes }}
+          draft: false
+          prerelease: false 
