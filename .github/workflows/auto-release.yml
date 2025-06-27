@@ -16,13 +16,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract version from tag
+      - name: Extract version from tag or branch
         id: version
         run: |
-          # Get the version from the tag
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION"
+          # Check if this is a tag push or branch push
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            # Get the version from the tag
+            VERSION=${GITHUB_REF#refs/tags/}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Extracted version from tag: $VERSION"
+          elif [[ "$GITHUB_REF" == refs/heads/release ]]; then
+            # For release branch, we need to determine the version
+            # This could be from a file, git commit, or other source
+            # For now, let's use a timestamp-based version
+            VERSION="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Generated version for release branch: $VERSION"
+          else
+            echo "Error: Unexpected ref $GITHUB_REF"
+            exit 1
+          fi
 
       - name: Extract release notes
         id: release-notes
@@ -33,9 +46,10 @@ jobs:
           # Read the release notes file
           if [ -f "docs/release-notes.md" ]; then
             # Use awk to extract content between ## version: and next ##
+            # Fix the awk syntax by properly escaping the version variable
             RELEASE_NOTES=$(awk -v version="$VERSION" '
               BEGIN { in_section = 0; content = "" }
-              /^## '"$VERSION"':/ { in_section = 1; next }
+              $0 ~ "^## " version ":" { in_section = 1; next }
               /^## [0-9]/ && in_section { exit }
               in_section { content = content $0 "\n" }
               END { print content }
