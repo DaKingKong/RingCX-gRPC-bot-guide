@@ -109,21 +109,23 @@ jobs:
               echo "No release notes found for version $VERSION"
               echo "Available versions in file:"
               grep "^## " docs/release-notes.md | head -10
-              RELEASE_NOTES="No release notes available for this version."
+              echo "notes_found=false" >> $GITHUB_OUTPUT
+              echo "release_notes=No release notes available for this version." >> $GITHUB_OUTPUT
+            else
+              echo "Final release notes:"
+              echo "$RELEASE_NOTES"
+              echo "notes_found=true" >> $GITHUB_OUTPUT
+              echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+              echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
             fi
-            
-            echo "Final release notes:"
-            echo "$RELEASE_NOTES"
-            
-            echo "release_notes<<EOF" >> $GITHUB_OUTPUT
-            echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
             
             echo "Extracted release notes for version $VERSION"
             echo "Preview of release notes:"
             echo "$RELEASE_NOTES" | head -10
           else
             echo "Release notes file not found"
+            echo "notes_found=false" >> $GITHUB_OUTPUT
             echo "release_notes=Release notes file not found." >> $GITHUB_OUTPUT
           fi
           echo "================================"
@@ -139,6 +141,7 @@ jobs:
           echo "================================"
 
       - name: Create Release
+        if: ${{ steps.release-notes.outputs.notes_found == 'true' }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
